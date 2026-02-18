@@ -13,48 +13,37 @@ Just run: python quick_start.py
 No configuration needed!
 """
 
-import inspect
 import random
-from importlib import util
 
-if util.find_spec("hyperai"):
-    from hyperai import DigitalGenome, DigitalOrganism
-else:
+try:
+    # Ưu tiên local: chạy thẳng từ root repo, không phụ thuộc nền tảng cài đặt
     from digital_ai_organism_framework import DigitalGenome, DigitalOrganism
+except ImportError:
+    # Fallback khi package đã được cài vào môi trường
+    from hyperai import DigitalGenome, DigitalOrganism
 
 
 def create_genome(traits, mutation_rate):
-    """Create genome compatible with both package/module variants."""
-    params = inspect.signature(DigitalGenome).parameters
-    kwargs = {}
+    """Tạo genome tương thích cho cả 2 biến thể API."""
+    try:
+        return DigitalGenome(traits=traits, mutation_rate=mutation_rate)
+    except TypeError:
+        return DigitalGenome(initial_traits=traits)
 
-    if "traits" in params:
-        kwargs["traits"] = traits
-    elif "initial_traits" in params:
-        kwargs["initial_traits"] = traits
-
-    if "mutation_rate" in params:
-        kwargs["mutation_rate"] = mutation_rate
-
-    return DigitalGenome(**kwargs)
 
 
 def create_organism(name, genome, initial_resources=None):
-    """Create organism compatible with both package/module variants."""
-    params = inspect.signature(DigitalOrganism).parameters
-    kwargs = {"genome": genome}
-
-    if "organism_id" in params:
-        kwargs["organism_id"] = name
-    elif "name" in params:
-        kwargs["name"] = name
-
-    organism = DigitalOrganism(**kwargs)
+    """Tạo organism tương thích cho cả 2 biến thể API."""
+    try:
+        organism = DigitalOrganism(organism_id=name, genome=genome)
+    except TypeError:
+        organism = DigitalOrganism(name=name, genome=genome)
 
     if initial_resources and hasattr(organism, "metabolism"):
         organism.metabolism.resources.update(initial_resources)
 
     return organism
+
 
 
 def get_organism_name(organism):

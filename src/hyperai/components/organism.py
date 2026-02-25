@@ -20,7 +20,9 @@ def _load_framework_module():
 
 
 _framework_module = _load_framework_module()
-_organism_impl = getattr(_framework_module, "DigitalOrganism", None) if _framework_module else None
+_organism_impl = (
+    getattr(_framework_module, "DigitalOrganism", None) if _framework_module else None
+)
 
 if _organism_impl:
     DigitalOrganism = _organism_impl
@@ -37,5 +39,6 @@ else:
         def __init__(self):
             self.creator = "alpha_prime_omega"
             self.verification = 4287
+
 
 __all__ = ["DigitalOrganism"]

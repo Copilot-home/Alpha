@@ -31,7 +31,6 @@ def create_genome(traits, mutation_rate):
         return DigitalGenome(initial_traits=traits)
 
 
-
 def create_organism(name, genome, initial_resources=None):
     """Tạo organism tương thích cho cả 2 biến thể API."""
     try:
@@ -43,7 +42,6 @@ def create_organism(name, genome, initial_resources=None):
         organism.metabolism.resources.update(initial_resources)
 
     return organism
-
 
 
 def get_organism_name(organism):
@@ -142,9 +140,7 @@ def main():
     offspring = []
     for i in range(3):
         child_genome = mutate_genome(genome, mutation_rate=0.1)
-        child = create_organism(
-            name=f"Explorer_01_Child_{i+1}", genome=child_genome
-        )
+        child = create_organism(name=f"Explorer_01_Child_{i+1}", genome=child_genome)
         offspring.append((child, child_genome))
 
     # Show evolution
@@ -250,7 +246,9 @@ def main():
         print(f"Generation {generation + 1}:")
         print(f"   Population: {len(population)} organisms")
         print(f"   Avg Fitness: {avg_fitness:.3f}")
-        print(f"   Best: {get_organism_name(best)} (fitness: {best.genome.fitness_score:.3f})")
+        print(
+            f"   Best: {get_organism_name(best)} (fitness: {best.genome.fitness_score:.3f})"
+        )
 
         # Create next generation (simplified)
         if generation < 4:  # Don't create new gen on last iteration

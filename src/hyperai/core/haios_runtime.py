@@ -20,7 +20,9 @@ def _load_runtime_module():
 
 
 _runtime_module = _load_runtime_module()
-_runtime_impl = getattr(_runtime_module, "HAIOSRuntime", None) if _runtime_module else None
+_runtime_impl = (
+    getattr(_runtime_module, "HAIOSRuntime", None) if _runtime_module else None
+)
 
 if _runtime_impl:
     HAIOSRuntime = _runtime_impl

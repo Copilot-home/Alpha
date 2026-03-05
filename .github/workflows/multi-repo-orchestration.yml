@@ -50,6 +50,9 @@ jobs:
           echo "🚨 Emergency Mode: ${{ github.event.inputs.emergency_mode || 'false' }}"
           echo "="*80
 
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
       - name: 🐍 Setup Python Environment
         uses: actions/setup-python@v5
         with:

@@ -12,6 +12,13 @@ import importlib
 import warnings
 
 
+# Import from root-level implementation if exists
+try:
+    import digital_ai_organism_framework as daiof
+
+    DRProtocol = daiof.DRProtocol
+except ImportError:
+    # Provide stub implementation
 def _load_framework_module():
     try:
         return importlib.import_module("digital_ai_organism_framework")
@@ -50,6 +57,8 @@ else:
                 },
                 "decision": "Protocol applied",
             }
+except AttributeError as exc:
+    raise AttributeError("digital_ai_organism_framework.DRProtocol not found") from exc
 
 
 __all__ = ["DRProtocol"]

@@ -12,10 +12,9 @@ import os
 import sys
 import warnings
 from pathlib import Path
+import importlib
+import warnings
 
-# Add root directory to path to import from root-level modules
-root_dir = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(root_dir))
 
 # Import from root-level implementation if exists
 def _allow_stubs() -> bool:
@@ -23,7 +22,7 @@ def _allow_stubs() -> bool:
 
 
 try:
-    from digital_ai_organism_framework import DRProtocol as DRProtocolImpl
+    import digital_ai_organism_framework as daiof
 
     DRProtocol = DRProtocolImpl
 except (ImportError, AttributeError) as exc:
@@ -62,6 +61,49 @@ except (ImportError, AttributeError) as exc:
             "project dependencies or set HYPERAI_ALLOW_STUBS=1 to allow stub "
             "implementations."
         ) from exc
+    DRProtocol = daiof.DRProtocol
+except ImportError:
+    # Provide stub implementation
+def _load_framework_module():
+    try:
+        return importlib.import_module("digital_ai_organism_framework")
+    except ModuleNotFoundError:
+        return None
+
+
+_framework_module = _load_framework_module()
+_dr_impl = getattr(_framework_module, "DRProtocol", None) if _framework_module else None
+
+if _dr_impl:
+    DRProtocol = _dr_impl
+else:
+    warnings.warn(
+        "DRProtocol implementation not found; using stub protocol. "
+        "Ensure digital_ai_organism_framework.py is available in the project root or packaged module.",
+        RuntimeWarning,
+    )
+
+    class DRProtocol:
+        """D&R Protocol - Deconstruct and Rearchitect"""
+
+        def __init__(self):
+            self.creator = "alpha_prime_omega"
+            self.verification = 4287
+
+        def apply(self, context: str):
+            """Apply D&R protocol to context"""
+            return {
+                "socratic_reflection": f"Analyzing: {context}",
+                "four_pillars_check": {
+                    "safety": 7.0,
+                    "long_term": 7.0,
+                    "data_driven": 7.0,
+                    "risk_management": 7.0,
+                },
+                "decision": "Protocol applied",
+            }
+except AttributeError as exc:
+    raise AttributeError("digital_ai_organism_framework.DRProtocol not found") from exc
 
 
 __all__ = ["DRProtocol"]

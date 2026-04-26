@@ -1,39 +1,34 @@
-"""Command-line interface for the HyperAI framework."""
+"""Command-line interface for the HYPERAI framework."""
 
 from __future__ import annotations
 
 import argparse
-from typing import Iterable, Optional
 
 from . import __version__
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Create the CLI argument parser."""
+def main() -> int:
+    """Entry point for the `hyperai` CLI."""
     parser = argparse.ArgumentParser(
         prog="hyperai",
-        description="HyperAI framework command-line interface.",
+        description="HYPERAI framework command-line interface.",
     )
     parser.add_argument(
         "--version",
         action="store_true",
-        help="Show the HyperAI framework version and exit.",
+        help="Show the HYPERAI version and exit.",
     )
-    return parser
-
-
-def main(argv: Optional[Iterable[str]] = None) -> int:
-    """Run the HyperAI CLI entrypoint."""
-    parser = build_parser()
-    args = parser.parse_args(argv)
+    args = parser.parse_args()
 
     if args.version:
-        print(f"hyperai {__version__}")
+        print(__version__)
         return 0
 
-    print("HyperAI framework is installed. Use --version for version info.")
+    parser.print_help()
     return 0
 
+
+__all__ = ["main"]
 
 if __name__ == "__main__":
     raise SystemExit(main())

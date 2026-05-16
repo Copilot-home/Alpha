@@ -11,14 +11,9 @@ Verification: 4287
 import importlib
 import warnings
 
+from hyperai.config import allow_stubs as _allow_stubs
 
-# Import from root-level implementation if exists
-try:
-    import digital_ai_organism_framework as daiof
 
-    DRProtocol = daiof.DRProtocol
-except ImportError:
-    # Provide stub implementation
 def _load_framework_module():
     try:
         return importlib.import_module("digital_ai_organism_framework")
@@ -31,7 +26,7 @@ _dr_impl = getattr(_framework_module, "DRProtocol", None) if _framework_module e
 
 if _dr_impl:
     DRProtocol = _dr_impl
-else:
+elif _allow_stubs():
     warnings.warn(
         "DRProtocol implementation not found; using stub protocol. "
         "Ensure digital_ai_organism_framework.py is available in the project root or packaged module.",
@@ -39,14 +34,14 @@ else:
     )
 
     class DRProtocol:
-        """D&R Protocol - Deconstruct and Rearchitect"""
+        """D&R Protocol - Deconstruct and Rearchitect."""
 
         def __init__(self):
             self.creator = "alpha_prime_omega"
             self.verification = 4287
 
         def apply(self, context: str):
-            """Apply D&R protocol to context"""
+            """Apply D&R protocol to context."""
             return {
                 "socratic_reflection": f"Analyzing: {context}",
                 "four_pillars_check": {
@@ -57,8 +52,12 @@ else:
                 },
                 "decision": "Protocol applied",
             }
-except AttributeError as exc:
-    raise AttributeError("digital_ai_organism_framework.DRProtocol not found") from exc
+
+else:
+    raise ModuleNotFoundError(
+        "DRProtocol implementation not found and stubs are disabled. "
+        "Set HYPERAI_ALLOW_STUBS=1 to allow the fallback stub."
+    )
 
 
 __all__ = ["DRProtocol"]

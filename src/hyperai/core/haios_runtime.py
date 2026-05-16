@@ -11,6 +11,8 @@ Verification: 4287
 import importlib
 import warnings
 
+from hyperai.config import allow_stubs as _allow_stubs
+
 
 def _load_runtime_module():
     try:
@@ -26,7 +28,7 @@ _runtime_impl = (
 
 if _runtime_impl:
     HAIOSRuntime = _runtime_impl
-else:
+elif _allow_stubs():
     warnings.warn(
         "HAIOSRuntime implementation not found; using stub runtime. "
         "Ensure haios_runtime.py is available in the project root or packaged module.",
@@ -34,11 +36,17 @@ else:
     )
 
     class HAIOSRuntime:
-        """Stub implementation of HAIOSRuntime"""
+        """Stub implementation of HAIOSRuntime."""
 
         def __init__(self):
             self.version = "1.0.0"
             self.creator = "alpha_prime_omega"
+
+else:
+    raise ModuleNotFoundError(
+        "HAIOSRuntime implementation not found and stubs are disabled. "
+        "Set HYPERAI_ALLOW_STUBS=1 to allow the fallback stub."
+    )
 
 
 __all__ = ["HAIOSRuntime"]

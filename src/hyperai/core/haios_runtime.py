@@ -11,10 +11,31 @@ Verification: 4287
 # Import from package implementation
 try:
     from hyperai.haios_runtime import HAIOSRuntime as HAIOSRuntimeImpl
+import importlib
+import warnings
 
-    HAIOSRuntime = HAIOSRuntimeImpl
-except ImportError:
-    # If haios_runtime doesn't exist, provide a stub
+
+def _load_runtime_module():
+    try:
+        return importlib.import_module("haios_runtime")
+    except ModuleNotFoundError:
+        return None
+
+
+_runtime_module = _load_runtime_module()
+_runtime_impl = (
+    getattr(_runtime_module, "HAIOSRuntime", None) if _runtime_module else None
+)
+
+if _runtime_impl:
+    HAIOSRuntime = _runtime_impl
+else:
+    warnings.warn(
+        "HAIOSRuntime implementation not found; using stub runtime. "
+        "Ensure haios_runtime.py is available in the project root or packaged module.",
+        RuntimeWarning,
+    )
+
     class HAIOSRuntime:
         """Stub implementation of HAIOSRuntime"""
 

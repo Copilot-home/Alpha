@@ -11,10 +11,29 @@ Verification: 4287
 # Import from package implementation if exists
 try:
     from hyperai.digital_ai_organism_framework import DRProtocol as DRProtocolImpl
+import importlib
+import warnings
 
-    DRProtocol = DRProtocolImpl
-except (ImportError, AttributeError):
-    # Provide stub implementation
+
+def _load_framework_module():
+    try:
+        return importlib.import_module("digital_ai_organism_framework")
+    except ModuleNotFoundError:
+        return None
+
+
+_framework_module = _load_framework_module()
+_dr_impl = getattr(_framework_module, "DRProtocol", None) if _framework_module else None
+
+if _dr_impl:
+    DRProtocol = _dr_impl
+else:
+    warnings.warn(
+        "DRProtocol implementation not found; using stub protocol. "
+        "Ensure digital_ai_organism_framework.py is available in the project root or packaged module.",
+        RuntimeWarning,
+    )
+
     class DRProtocol:
         """D&R Protocol - Deconstruct and Rearchitect"""
 

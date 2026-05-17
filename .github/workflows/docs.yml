@@ -1,23 +1,15 @@
-name: 📚 Update Documentation
+name: Docs
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'docs/**'
-      - '*.md'
-      - '.github/workflows/docs.yml'
+    branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  update-docs:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
@@ -25,6 +17,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+          cache: 'pip'
       
       - name: Install dependencies
         run: |
@@ -33,40 +26,4 @@ jobs:
       
       - name: Generate API documentation
         run: |
-          python -c "
-          import digital_ai_organism_framework as daiof
-          import inspect
-          
-          with open('docs/api.md', 'w') as f:
-              f.write('# API Reference\n\n')
-              f.write('Auto-generated API documentation.\n\n')
-              
-              # Document main classes
-              for name in ['DigitalGenome', 'DigitalOrganism', 'DigitalEcosystem', 'SymphonyControlCenter']:
-                  cls = getattr(daiof, name)
-                  f.write(f'## {name}\n\n')
-                  f.write(f'{inspect.getdoc(cls)}\n\n')
-                  
-                  # List methods
-                  f.write('### Methods\n\n')
-                  for method_name in dir(cls):
-                      if not method_name.startswith('_'):
-                          method = getattr(cls, method_name)
-                          if callable(method):
-                              f.write(f'- **{method_name}**\n')
-                  f.write('\n')
-          "
-      
-      - name: Update README badges
-        run: |
-          # Update last updated date
-          sed -i "s/Last Updated: .*/Last Updated: $(date '+%B %d, %Y')/" README.md
-      
-      - name: Commit documentation updates
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add docs/ README.md
-          git diff --quiet && git diff --staged --quiet || git commit -m "📚 Auto-update documentation [skip ci]"
-          git push
-        continue-on-error: true
+          mkdocs build

@@ -31,7 +31,6 @@ from .protocols.dr_protocol import DRProtocol
 from .protocols.metadata import CreatorHierarchy, HAIOSInvariants
 # Protocol imports
 from .protocols.symphony import ControlMetaData, SymphonyControlCenter
-
 __all__ = [
     # Core
     "HAIOSCore",

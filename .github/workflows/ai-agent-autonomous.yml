@@ -1,38 +1,14 @@
-name: AI Agent Autonomous Operations
+name: AI Agent Autonomous
 
 on:
-  schedule:
-    # Chạy mỗi 6 giờ để kiểm tra và thực hiện tác vụ
-    - cron: '0 */6 * * *'
   workflow_dispatch:
-    inputs:
-      task_type:
-        description: 'Type of autonomous task to execute'
-        required: false
-        type: choice
-        options:
-          - auto_maintain
-          - community_engagement
-          - content_update
-          - metrics_report
-        default: 'auto_maintain'
-
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  discussions: write
 
 jobs:
-  autonomous-agent:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: 🚀 Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: 🐍 Setup Python Environment
         uses: actions/setup-python@v4
         with:
@@ -44,38 +20,3 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
           pip install PyGithub requests pyyaml
-
-      - name: 🤖 Execute Autonomous Agent
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TASK_TYPE: ${{ github.event.inputs.task_type || 'auto_maintain' }}
-          REPO_NAME: ${{ github.repository }}
-        run: |
-          python .github/scripts/autonomous_agent.py
-
-      - name: 📊 Generate Activity Report
-        if: always()
-        run: |
-          echo "## AI Agent Activity Report" >> $GITHUB_STEP_SUMMARY
-          echo "- **Task Type**: ${{ github.event.inputs.task_type || 'auto_maintain' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Execution Time**: $(date -u)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ✅ Completed" >> $GITHUB_STEP_SUMMARY
-
-      - name: 💾 Commit Changes (if any)
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "AI Agent 🤖"
-          
-          # Kiểm tra xem có thay đổi không
-          if [[ -n $(git status -s) ]]; then
-            git add .
-            git commit -m "🤖 AI Agent: Autonomous maintenance update
-
-            - Task: ${{ github.event.inputs.task_type || 'auto_maintain' }}
-            - Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-            - Executed by: GitHub Actions autonomous workflow"
-            git push
-            echo "✅ Changes committed and pushed"
-          else
-            echo "ℹ️ No changes to commit"
-          fi

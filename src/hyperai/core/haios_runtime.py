@@ -8,6 +8,9 @@ Original Creation: October 30, 2025
 Verification: 4287
 """
 
+# Import from package implementation
+try:
+    from hyperai.haios_runtime import HAIOSRuntime as HAIOSRuntimeImpl
 import importlib
 import warnings
 

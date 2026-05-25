@@ -1,41 +1,14 @@
-name: 🧬 Autonomous Development - Self-Evolving Organism
+name: Autonomous Development
 
 on:
-  schedule:
-    # Every 4 hours - organism actively develops itself
-    - cron: '0 */4 * * *'
   workflow_dispatch:
-    inputs:
-      task_type:
-        description: 'Development task type'
-        required: true
-        type: choice
-        options:
-          - auto_improve_code
-          - auto_generate_content
-          - auto_update_dependencies
-          - auto_optimize_health
-          - full_autonomous_cycle
-        default: full_autonomous_cycle
-
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  discussions: write
 
 jobs:
-  autonomous_development:
+  build:
     runs-on: ubuntu-latest
-    name: Self-Developing Organism
-    
     steps:
-      - name: 🧬 Clone Organism DNA
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
       - name: 🐍 Prepare Organism Environment
         uses: actions/setup-python@v5
         with:
@@ -47,55 +20,3 @@ jobs:
           pip install --upgrade pip
           pip install PyGithub pyyaml requests python-dotenv
           pip install pylint autopep8 black isort
-          pip install matplotlib seaborn pandas
-      
-      - name: 🧠 Load Organism Genome
-        run: |
-          echo "🧬 Loading organism configuration..."
-          python3 -c "
-          import yaml
-          with open('.github/DIGITAL_ORGANISM_GENOME.yml') as f:
-              genome = yaml.safe_load(f)
-              print(f\"Organism loaded: {genome['metadata']['name']}\")
-              print(f\"Learning rate: {genome['genes']['behavioral_traits']['learning_rate']}\")
-          "
-      
-      - name: 🤖 Execute Autonomous Development
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TASK_TYPE: ${{ github.event.inputs.task_type || 'full_autonomous_cycle' }}
-        run: |
-          echo "🚀 Starting autonomous development cycle..."
-          python3 .github/scripts/autonomous_developer.py
-      
-      - name: 📊 Generate Development Report
-        if: always()
-        run: |
-          echo "📊 Generating organism development report..."
-          if [ -f "reports/development_report.md" ]; then
-            cat reports/development_report.md >> $GITHUB_STEP_SUMMARY
-          fi
-      
-      - name: 💾 Commit Organism Evolution
-        if: success()
-        run: |
-          git config user.name "DAIOF Organism"
-          git config user.email "organism@daiof-framework.dev"
-          
-          # Check if there are changes
-          if [ -n "$(git status --porcelain)" ]; then
-            git add .
-            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
-            TASK="${{ github.event.inputs.task_type || 'full_autonomous_cycle' }}"
-            git commit -m "🧬 Autonomous evolution: $TIMESTAMP - Task: $TASK - Self-development cycle completed [Digital Organism]"
-            git push
-            echo "✅ Evolution committed and pushed"
-          else
-            echo "ℹ️ No changes to commit"
-          fi
-      
-      - name: 🏥 Update Health Status
-        if: always()
-        run: |
-          echo "🏥 Running post-development health check..."
-          python3 .github/scripts/health_monitor.py || true

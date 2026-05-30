@@ -1,3 +1,6 @@
+q"""
+Command-line interface for the HYPERAI Framework.
+"""
 """
 Command-line interface for the HYPERAI Framework.
 """

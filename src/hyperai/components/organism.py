@@ -9,7 +9,7 @@ Verification: 4287
 """
 
 # Import from package implementation
-from hyperai.digital_ai_organism_framework import DigitalOrganism
+from ..digital_ai_organism_framework import DigitalOrganism
 import importlib
 import warnings
 

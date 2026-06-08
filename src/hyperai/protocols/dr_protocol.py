@@ -9,8 +9,6 @@ Verification: 4287
 """
 
 # Import from package implementation if exists
-try:
-    from hyperai.digital_ai_organism_framework import DRProtocol as DRProtocolImpl
 import importlib
 import warnings
 

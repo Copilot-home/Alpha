@@ -137,6 +137,10 @@ from hyperai import DigitalEcosystem, DigitalGenome, DigitalOrganism
 python quick_start.py
 ```
 
+**Run a local smoke check:**
+
+```bash
+python scripts/local_smoke.py
 ```python
 from digital_ai_organism_framework import (
     DigitalEcosystem,

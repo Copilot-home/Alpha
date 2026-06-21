@@ -8,6 +8,8 @@ Original Creation: October 30, 2025
 Verification: 4287
 """
 
+# Import from package implementation
+from ..digital_ai_organism_framework import DigitalOrganism
 import importlib
 import warnings
 

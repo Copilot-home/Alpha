@@ -1,0 +1,9 @@
+{
+  "Slack": "unstable",
+  "PayPal": "blocked",
+  "HuggingFace": "retry_required",
+  "Internshala": "noisy",
+  "GitHub": "healthy",
+  "Base44": "healthy",
+  "HubSpot": "healthy"
+}

@@ -31,6 +31,8 @@ from .protocols.dr_protocol import DRProtocol
 from .protocols.metadata import CreatorHierarchy, HAIOSInvariants
 # Protocol imports
 from .protocols.symphony import ControlMetaData, SymphonyControlCenter
+# CLI import
+from .cli import main
 
 __all__ = [
     # Core
@@ -50,4 +52,6 @@ __all__ = [
     # Metadata
     "HAIOSInvariants",
     "CreatorHierarchy",
+    # CLI
+    "main",
 ]

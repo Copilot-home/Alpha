@@ -13,17 +13,25 @@ import importlib
 import warnings
 
 
+def _load_dr_protocol_impl():
+    module_name = "digital_ai_organism_framework"
+    try:
+        framework_module = importlib.import_module(module_name)
+    except ImportError as exc:
+        if getattr(exc, "name", None) == module_name:
+            return None
+        raise
+
 def _load_framework_module():
     try:
-        return importlib.import_module("digital_ai_organism_framework")
-    except ModuleNotFoundError:
-        return None
+        return framework_module.DRProtocol
+    except AttributeError as exc:
+        raise AttributeError("digital_ai_organism_framework.DRProtocol not found") from exc
 
 
-_framework_module = _load_framework_module()
-_dr_impl = getattr(_framework_module, "DRProtocol", None) if _framework_module else None
+_dr_impl = _load_dr_protocol_impl()
 
-if _dr_impl:
+if _dr_impl is not None:
     DRProtocol = _dr_impl
 else:
     warnings.warn(

@@ -14,6 +14,10 @@ import warnings
 
 from hyperai.config import allow_stubs as _allow_stubs
 
+# Add root directory to path to import from root-level modules
+root_dir = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(root_dir))
+
 def _load_dr_protocol_impl():
     module_name = "digital_ai_organism_framework"
     try:
@@ -41,6 +45,12 @@ elif _allow_stubs():
         RuntimeWarning,
     )
 
+    DRProtocol = DRProtocolImpl
+except (ImportError, AttributeError):
+    if not _allow_stubs():
+        raise
+
+    # Provide stub implementation
     class DRProtocol:
         """D&R Protocol - Deconstruct and Rearchitect."""
 

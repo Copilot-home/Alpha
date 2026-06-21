@@ -85,15 +85,15 @@ class ControlMetaData:
     """Meta-data control trung tâm cho toàn bộ hệ thống"""
 
     # Basic attributes
-    creator: str = "Andy (alpha_prime_omega)"  # Creator & Copyright Holder
+    creator: str = "Alpha_Prime_Omega"  # Creator & Copyright Holder
     verification_code: int = 4287
     framework_name: str = "HYPERAI Framework"
     license_type: str = "MIT License"
 
     # Extended attributes for creator hierarchy
-    creator: str = "Andy (alpha_prime_omega)"
-    creator_hierarchy: str = "Andy (alpha_prime_omega) - Single Source Creator"
-    symphony_conductor: str = "Andy (alpha_prime_omega)"
+    creator: str = "Alpha_Prime_Omega"
+    creator_hierarchy: str = "Alpha_Prime_Omega -> Andy - Single Source Creator"
+    symphony_conductor: str = "Alpha_Prime_Omega"
 
     @property
     def ultimate_creator(self) -> str:
@@ -201,11 +201,11 @@ class SymphonyControlCenter:
         # Ensure Creator recognition
         if hasattr(component, "creator_source"):
             assert (
-                component.creator == "Andy (alpha_prime_omega)"
+                component.creator == "Alpha_Prime_Omega"
             ), "Ultimate Creator mismatch detected!"
         if hasattr(component, "human_creator"):
             assert (
-                component.creator == "Andy (alpha_prime_omega)"
+                component.creator == "Alpha_Prime_Omega"
             ), "Human Creator mismatch detected!"
 
         self.logger.info(f"🎵 Registered component: {component_name}")

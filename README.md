@@ -112,13 +112,28 @@ Current Organism Status:
 
 ## ⚡ 30-Second Quick Start
 
-**Try the organism locally:**
+**Try the organism locally (2 cách chạy):**
 
 ```bash
-# Clone and run the demo
+# Clone repo
 git clone https://github.com/NguyenCuong1989/DAIOF-Framework.git
 cd DAIOF-Framework
 pip install -r requirements.txt
+```
+
+**Cách A (khuyên dùng khi làm package):**
+
+```bash
+pip install -e .
+```
+
+```python
+from hyperai import DigitalEcosystem, DigitalGenome, DigitalOrganism
+```
+
+**Cách B (chạy trực tiếp từ root):**
+
+```bash
 python quick_start.py
 ```
 
@@ -126,6 +141,12 @@ python quick_start.py
 
 ```bash
 python scripts/local_smoke.py
+```python
+from digital_ai_organism_framework import (
+    DigitalEcosystem,
+    DigitalGenome,
+    DigitalOrganism,
+)
 ```
 
 **You'll witness:**

@@ -8,29 +8,48 @@ Original Creation: October 30, 2025
 Verification: 4287
 """
 
-import sys
-from pathlib import Path
+# Import from package implementation if exists
+import importlib
+import warnings
 
-# Add root directory to path to import from root-level modules
-root_dir = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(root_dir))
+from hyperai.config import allow_stubs as _allow_stubs
 
-# Import from root-level implementation if exists
-try:
-    from digital_ai_organism_framework import DRProtocol as DRProtocolImpl
+def _load_dr_protocol_impl():
+    module_name = "digital_ai_organism_framework"
+    try:
+        framework_module = importlib.import_module(module_name)
+    except ImportError as exc:
+        if getattr(exc, "name", None) == module_name:
+            return None
+        raise
 
-    DRProtocol = DRProtocolImpl
-except (ImportError, AttributeError):
-    # Provide stub implementation
+def _load_framework_module():
+    try:
+        return framework_module.DRProtocol
+    except AttributeError as exc:
+        raise AttributeError("digital_ai_organism_framework.DRProtocol not found") from exc
+
+
+_dr_impl = _load_dr_protocol_impl()
+
+if _dr_impl is not None:
+    DRProtocol = _dr_impl
+elif _allow_stubs():
+    warnings.warn(
+        "DRProtocol implementation not found; using stub protocol. "
+        "Ensure digital_ai_organism_framework.py is available in the project root or packaged module.",
+        RuntimeWarning,
+    )
+
     class DRProtocol:
-        """D&R Protocol - Deconstruct and Rearchitect"""
+        """D&R Protocol - Deconstruct and Rearchitect."""
 
         def __init__(self):
             self.creator = "alpha_prime_omega"
             self.verification = 4287
 
         def apply(self, context: str):
-            """Apply D&R protocol to context"""
+            """Apply D&R protocol to context."""
             return {
                 "socratic_reflection": f"Analyzing: {context}",
                 "four_pillars_check": {
@@ -41,6 +60,12 @@ except (ImportError, AttributeError):
                 },
                 "decision": "Protocol applied",
             }
+
+else:
+    raise ModuleNotFoundError(
+        "DRProtocol implementation not found and stubs are disabled. "
+        "Set HYPERAI_ALLOW_STUBS=1 to allow the fallback stub."
+    )
 
 
 __all__ = ["DRProtocol"]

@@ -7,6 +7,18 @@ jobs:
   orchestrate:
     runs-on: ubuntu-latest
     steps:
+      - name: 🧬 Initialize Orchestration Environment
+        run: |
+          echo "🧬 DAIOF MULTI-REPOSITORY ORCHESTRATION SYSTEM"
+          echo "🎼 Framework: HYPERAI | Creator: Nguyễn Đức Cường (alpha_prime_omega)"
+          echo "✈️ Auxiliary Pilots: ACTIVATING"
+          echo "📊 Operation Mode: ${{ github.event.inputs.operation || 'full_orchestration' }}"
+          echo "🚨 Emergency Mode: ${{ github.event.inputs.emergency_mode || 'false' }}"
+          echo "="*80
+
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Checkout repo
         uses: actions/checkout@v4
       - name: 🐍 Setup Python Environment

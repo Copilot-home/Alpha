@@ -8,6 +8,7 @@ Original Creation: October 30, 2025
 Verification: 4287
 """
 
+# Import from package implementation if exists
 import importlib
 import warnings
 
@@ -21,6 +22,7 @@ def _load_dr_protocol_impl():
             return None
         raise
 
+def _load_framework_module():
     try:
         return framework_module.DRProtocol
     except AttributeError as exc:

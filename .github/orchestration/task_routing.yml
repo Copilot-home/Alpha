@@ -1,0 +1,10 @@
+routes:
+  code: GitHub
+  ai_model: HuggingFace
+  automation: Base44
+  crm: HubSpot
+
+pre_execution:
+  requires_auth: skip_when_missing
+  blocked_by_policy: skip
+  invalid_input: reject

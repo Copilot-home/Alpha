@@ -8,8 +8,9 @@ Original Creation: October 30, 2025
 Verification: 4287
 """
 
-import sys
-from pathlib import Path
+# Import from package implementation
+import importlib
+import warnings
 
 from hyperai.config import allow_stubs as _allow_stubs
 
@@ -17,9 +18,6 @@ from hyperai.config import allow_stubs as _allow_stubs
 root_dir = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(root_dir))
 
-# Import from root-level implementation
-try:
-    from haios_runtime import HAIOSRuntime as HAIOSRuntimeImpl
 
     HAIOSRuntime = HAIOSRuntimeImpl
 except ImportError:
@@ -27,12 +25,39 @@ except ImportError:
         raise
 
     # If haios_runtime doesn't exist, provide a stub
+def _load_runtime_module():
+    try:
+        return importlib.import_module("haios_runtime")
+    except ModuleNotFoundError:
+        return None
+
+
+_runtime_module = _load_runtime_module()
+_runtime_impl = (
+    getattr(_runtime_module, "HAIOSRuntime", None) if _runtime_module else None
+)
+
+if _runtime_impl:
+    HAIOSRuntime = _runtime_impl
+elif _allow_stubs():
+    warnings.warn(
+        "HAIOSRuntime implementation not found; using stub runtime. "
+        "Ensure haios_runtime.py is available in the project root or packaged module.",
+        RuntimeWarning,
+    )
+
     class HAIOSRuntime:
-        """Stub implementation of HAIOSRuntime"""
+        """Stub implementation of HAIOSRuntime."""
 
         def __init__(self):
             self.version = "1.0.0"
             self.creator = "alpha_prime_omega"
+
+else:
+    raise ModuleNotFoundError(
+        "HAIOSRuntime implementation not found and stubs are disabled. "
+        "Set HYPERAI_ALLOW_STUBS=1 to allow the fallback stub."
+    )
 
 
 __all__ = ["HAIOSRuntime"]

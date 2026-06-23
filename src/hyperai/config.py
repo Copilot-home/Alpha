@@ -4,32 +4,15 @@ from __future__ import annotations
 
 import os
 
-
-def allow_stubs() -> bool:
-    """Return True when stub implementations are allowed."""
-    value = os.getenv("HYPERAI_ALLOW_STUBS", "").strip().lower()
-    return value in {"1", "true", "yes", "on"}
-_TRUTHY_VALUES = {"1", "true", "t", "yes", "y", "on"}
-_FALSY_VALUES = {"0", "false", "f", "no", "n", "off"}
+_TRUTHY_VALUES = {"1", "true", "yes", "on"}
 
 
 def allow_stubs() -> bool:
-    """Return whether stub implementations are allowed.
+    """Return True when stub implementations are allowed.
 
-    `HYPERAI_ALLOW_STUBS` controls behavior:
-    - unset/empty => True (backward-compatible default)
-    - truthy values => True
-    - falsy values => False
+    `HYPERAI_ALLOW_STUBS` enables stubs only when set to one of
+    {1, true, yes, on} (case-insensitive, surrounding whitespace ignored);
+    any other value, or leaving it unset, disables them.
     """
-
-    value = os.getenv("HYPERAI_ALLOW_STUBS")
-    if value is None or not value.strip():
-        return True
-
-    normalized = value.strip().lower()
-    if normalized in _TRUTHY_VALUES:
-        return True
-    if normalized in _FALSY_VALUES:
-        return False
-
-    return True
+    value = os.getenv("HYPERAI_ALLOW_STUBS", "").strip().lower()
+    return value in _TRUTHY_VALUES

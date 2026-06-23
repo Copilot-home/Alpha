@@ -8,9 +8,10 @@ Original Creation: October 30, 2025
 Verification: 4287
 """
 
-# Import from package implementation
 import importlib
+import sys
 import warnings
+from pathlib import Path
 
 from hyperai.config import allow_stubs as _allow_stubs
 
@@ -19,12 +20,6 @@ root_dir = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(root_dir))
 
 
-    HAIOSRuntime = HAIOSRuntimeImpl
-except ImportError:
-    if not _allow_stubs():
-        raise
-
-    # If haios_runtime doesn't exist, provide a stub
 def _load_runtime_module():
     try:
         return importlib.import_module("haios_runtime")
@@ -42,7 +37,8 @@ if _runtime_impl:
 elif _allow_stubs():
     warnings.warn(
         "HAIOSRuntime implementation not found; using stub runtime. "
-        "Ensure haios_runtime.py is available in the project root or packaged module.",
+        "Ensure haios_runtime.py is available in the project root or "
+        "packaged module.",
         RuntimeWarning,
     )
 

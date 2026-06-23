@@ -62,6 +62,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING:** `hyperai.config.allow_stubs()` now defaults to `False` when
+  `HYPERAI_ALLOW_STUBS` is unset or set to an unrecognized value (previously it
+  defaulted to `True`). As a result, `import hyperai` raises `ModuleNotFoundError`
+  unless the real `HAIOSRuntime`/`DRProtocol` implementations are available or
+  `HYPERAI_ALLOW_STUBS=1` is set to enable the stub fallback.
+
+### Fixed
+- Restored importability of the `hyperai` package by fixing syntax errors and
+  duplicate definitions in `cli.py`, `core/haios_runtime.py`,
+  `protocols/dr_protocol.py`, and `config.py`.
+
 ### Planned for v1.1.0
 - [ ] Advanced evolution algorithms (NEAT-inspired)
 - [ ] Visualization dashboard for ecosystem monitoring

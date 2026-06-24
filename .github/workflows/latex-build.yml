@@ -11,16 +11,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Check for LaTeX source
+        id: check
+        run: |
+          if [ -f docs/alpha_omega.tex ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::docs/alpha_omega.tex not found; skipping LaTeX build"
+          fi
       - name: Install LaTeX packages
+        if: steps.check.outputs.exists == 'true'
         run: |
           sudo apt-get update -y
           sudo apt-get install -y texlive-xetex texlive-latex-extra texlive-fonts-recommended texlive-lang-vietnamese latexmk
       - name: Build PDF
+        if: steps.check.outputs.exists == 'true'
         working-directory: docs
         run: |
           set -e
           latexmk -xelatex -pdf -quiet alpha_omega.tex
       - name: Upload PDF
+        if: steps.check.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: alpha_omega-pdf

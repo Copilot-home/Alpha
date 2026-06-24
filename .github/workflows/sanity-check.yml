@@ -1,0 +1,14 @@
+name: Sanity Check
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo
+        run: echo "CI runner is alive"

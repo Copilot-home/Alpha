@@ -78,7 +78,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fixing the spurious "Ultimate Creator mismatch" assertion that broke
   `DigitalEcosystem` creation and the ecosystem smoke tests. The companion
   `human_creator` check now also asserts against `human_creator` (the attribute
-  it gates on) instead of `creator`, removing a latent mismatch.
+  it gates on) instead of `creator`, removing a latent mismatch. The same
+  corrections are applied to the `src/hyperai/` copy (asserting `creator_source`
+  / `human_creator` against that copy's own creator values).
 - `haios_runtime.py` (root and `src/hyperai/`) no longer arms `signal.alarm(30)`
   / `signal.signal(SIGALRM, ...)` at import time. Importing the module would
   previously call `sys.exit(0)` 30 seconds later in the host process and crash

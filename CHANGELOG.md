@@ -76,7 +76,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SymphonyControlCenter.register_component()` now validates `creator_source`
   (the attribute actually set to `Alpha_Prime_Omega`) instead of `creator`,
   fixing the spurious "Ultimate Creator mismatch" assertion that broke
-  `DigitalEcosystem` creation and the ecosystem smoke tests.
+  `DigitalEcosystem` creation and the ecosystem smoke tests. The companion
+  `human_creator` check now also asserts against `human_creator` (the attribute
+  it gates on) instead of `creator`, removing a latent mismatch.
+- `haios_runtime.py` (root and `src/hyperai/`) no longer arms `signal.alarm(30)`
+  / `signal.signal(SIGALRM, ...)` at import time. Importing the module would
+  previously call `sys.exit(0)` 30 seconds later in the host process and crash
+  on Windows (no `SIGALRM`). The guard now lives in `install_timeout_guard()`,
+  invoked only when the module runs as a script and only where `SIGALRM` exists.
 
 ### CI/CD
 - Reworked `ci.yml` so the build is green and actually gates merges: fixed the

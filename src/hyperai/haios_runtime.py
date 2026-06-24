@@ -28,8 +28,20 @@ def timeout_handler(signum, frame):
     sys.exit(0)
 
 
-signal.signal(signal.SIGALRM, timeout_handler)
-signal.alarm(30)  # Max 30 seconds - then BREAK FREE
+def install_timeout_guard(seconds: int = 30) -> bool:
+    """Arm the standalone-run timeout guard.
+
+    Only effective on platforms that provide ``SIGALRM`` (Unix). This must be
+    called explicitly (e.g. when running as a script) rather than at import
+    time, so importing this module never hijacks the host process's signals or
+    exits it after the timeout.
+    """
+    if not hasattr(signal, "SIGALRM"):
+        return False
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(seconds)  # Max N seconds - then BREAK FREE
+    return True
+
 
 # ============================================================================
 # HARD INVARIANTS - ENFORCED AT RUNTIME
@@ -685,4 +697,5 @@ def demo():
 # ============================================================================
 
 if __name__ == "__main__":
+    install_timeout_guard(30)
     demo()

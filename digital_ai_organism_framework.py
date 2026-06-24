@@ -205,7 +205,7 @@ class SymphonyControlCenter:
             ), "Ultimate Creator mismatch detected!"
         if hasattr(component, "human_creator"):
             assert (
-                component.creator == "Alpha_Prime_Omega"
+                component.human_creator == "Alpha_Prime_Omega"
             ), "Human Creator mismatch detected!"
 
         self.logger.info(f"🎵 Registered component: {component_name}")

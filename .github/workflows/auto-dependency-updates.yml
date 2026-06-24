@@ -9,18 +9,18 @@ jobs:
   update-dependencies:
     runs-on: ubuntu-latest
     steps:
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-      
-      - name: 📦 Install pip-tools
+      - name: 📥 Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          pip install pip-tools pip-check-updates
-      
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: 📦 Install pip-tools
+        run: pip install pip-tools pip-check-updates
+
       - name: 🔍 Check for Updates
         id: check_updates
-        run: |
-          echo "Checking for dependency updates..."
-          # Actual update logic here
+        run: echo "Checking for dependency updates..."

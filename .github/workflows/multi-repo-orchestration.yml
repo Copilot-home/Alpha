@@ -20,19 +20,18 @@ jobs:
         run: |
           echo "🧬 DAIOF MULTI-REPOSITORY ORCHESTRATION SYSTEM"
           echo "🎼 Framework: HYPERAI | Creator: Nguyễn Đức Cường (alpha_prime_omega)"
-          echo "✈️ Auxiliary Pilots: ACTIVATING"
+          echo "✈ Auxiliary Pilots: ACTIVATING"
           echo "📊 Operation Mode: ${{ github.event.inputs.operation || 'full_orchestration' }}"
           echo "🚨 Emergency Mode: ${{ github.event.inputs.emergency_mode || 'false' }}"
-          echo "="*80
 
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: 🐍 Setup Python Environment
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-          cache: 'pip'
+      - name: 📥 Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
 
       - name: 📦 Install Orchestration Dependencies
         run: |

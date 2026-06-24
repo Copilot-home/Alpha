@@ -14,43 +14,16 @@ jobs:
   greeting:
     runs-on: ubuntu-latest
     steps:
-      - name: Greet first-time contributors
-        uses: actions/first-interaction@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: |
-            👋 **Welcome to DAIOF Framework!**
-            
-            Thank you for opening your first issue! We're excited to have you as part of our community. 🎉
-            
-            A maintainer will review your issue shortly. In the meantime:
-            - ⭐ Star the repository if you find it useful
-            - 📖 Check our [Documentation](https://nguyencuong1989.github.io/DAIOF-Framework/)
-            - 💬 Join [Discussions](https://github.com/NguyenCuong1989/DAIOF-Framework/discussions) for questions
-            - 🤝 Read [Contributing Guidelines](../CONTRIBUTING.md) if you'd like to contribute
-            
-            **Philosophy**: Just like DAIOF organisms need humans, this project thrives with community support! Together we build the future of AI-human symbiosis. 🌟
-            
-          pr-message: |
-            🎊 **Congratulations on your first Pull Request!**
-            
-            Thank you for contributing to DAIOF Framework! Your effort helps advance AI-human symbiosis research. 🚀
-            
-            **What happens next:**
-            1. ✅ Automated checks will run (CI/CD)
-            2. 👀 A maintainer will review your changes
-            3. 💬 We may request changes or ask questions
-            4. 🎉 Once approved, your PR will be merged!
-            
-            **Tips for a smooth review:**
-            - Ensure all tests pass ✅
-            - Follow code style guidelines (black formatting)
-            - Update documentation if needed
-            - Respond to review comments promptly
-            
-            **Join our community:**
-            - 💬 [Discussions](https://github.com/NguyenCuong1989/DAIOF-Framework/discussions)
-            - 📖 [Contributing Guide](../CONTRIBUTING.md)
-            - 🌟 [Code of Conduct](../CODE_OF_CONDUCT.md)
-            
-            Thank you for making DAIOF better! 🙏
+      - name: Checkout (self-contained, base ref)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: Greet first-time contributors (no external actions)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/gh_bot.py greet

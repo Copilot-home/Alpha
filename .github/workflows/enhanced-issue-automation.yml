@@ -9,18 +9,24 @@ jobs:
   process:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-      
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
       - name: 📦 Install Dependencies
-        run: |
-          pip install PyGithub
-      
+        run: pip install PyGithub
+
       - name: 🤖 Process New Issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/process_issue.py
+          if [ -f scripts/process_issue.py ]; then
+            python3 scripts/process_issue.py
+          else
+            echo "scripts/process_issue.py not present; skipping."
+          fi

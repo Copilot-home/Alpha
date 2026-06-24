@@ -6,7 +6,6 @@ on:
   issue_comment:
     types: [created]
   schedule:
-    # Check stale issues every day at midnight
     - cron: '0 0 * * *'
 
 permissions:
@@ -18,120 +17,58 @@ jobs:
     runs-on: ubuntu-latest
     name: Auto Label Issues
     if: github.event_name == 'issues' && github.event.action == 'opened'
-    
     steps:
-      - name: 🏷️ Auto Label Issue
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const issue = context.payload.issue;
-            const title = issue.title.toLowerCase();
-            const body = issue.body?.toLowerCase() || '';
-            
-            const labels = [];
-            
-            // Detect issue type
-            if (title.includes('bug') || body.includes('bug')) {
-              labels.push('bug');
-            }
-            if (title.includes('feature') || title.includes('enhancement')) {
-              labels.push('enhancement');
-            }
-            if (title.includes('documentation') || title.includes('docs')) {
-              labels.push('documentation');
-            }
-            if (title.includes('question') || body.includes('how to')) {
-              labels.push('question');
-            }
-            
-            // Detect priority
-            if (title.includes('urgent') || title.includes('critical')) {
-              labels.push('priority: high');
-            }
-            
-            // Detect good first issue
-            if (title.includes('good first') || body.includes('beginner')) {
-              labels.push('good first issue');
-            }
-            
-            // Add organism label
-            labels.push('auto-labeled');
-            
-            if (labels.length > 0) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                labels: labels
-              });
-              
-              console.log(`✅ Added labels: ${labels.join(', ')}`);
-            }
-  
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: 🏷 Auto Label Issue (no external actions)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/gh_bot.py issue-label
+
   auto_respond:
     runs-on: ubuntu-latest
     name: Auto Respond to Issues
     if: github.event_name == 'issues' && github.event.action == 'opened'
-    
     steps:
-      - name: 💬 Auto Response
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const issue = context.payload.issue;
-            
-            let response = `👋 **Welcome to DAIOF Framework!**\n\n`;
-            response += `Thank you for opening this issue! The Digital Organism has received your submission.\n\n`;
-            response += `🧬 **Next Steps:**\n`;
-            response += `- Issue has been automatically labeled\n`;
-            response += `- Our team will review within 24-48 hours\n`;
-            response += `- You'll be notified of any updates\n\n`;
-            response += `📚 **Helpful Resources:**\n`;
-            response += `- [Documentation](https://github.com/${context.repo.owner}/${context.repo.repo}#readme)\n`;
-            response += `- [Contributing Guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md)\n`;
-            response += `- [Examples](https://github.com/${context.repo.owner}/${context.repo.repo}/tree/main/examples)\n\n`;
-            response += `*Automated response by Digital Organism* 🤖`;
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue.number,
-              body: response
-            });
-  
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: 💬 Auto Response (no external actions)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/gh_bot.py issue-respond
+
   stale_check:
     runs-on: ubuntu-latest
     name: Check Stale Issues
     if: github.event_name == 'schedule'
-    
     steps:
-      - name: 🕰️ Mark Stale Issues
-        uses: actions/stale@v9
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          days-before-stale: 30
-          days-before-close: 7
-          stale-issue-message: |
-            🕰️ **Stale Issue Alert**
-            
-            This issue has been automatically marked as stale due to inactivity for 30 days.
-            
-            It will be automatically closed in 7 days unless there is new activity.
-            
-            If this issue is still relevant, please comment to keep it open.
-            
-            *Automated by Digital Organism*
-          close-issue-message: |
-            🔒 **Issue Auto-Closed**
-            
-            This issue was automatically closed due to inactivity.
-            
-            If you believe this was closed in error, please reopen it or create a new issue.
-            
-            Thank you for contributing! 🙏
-            
-            *Automated by Digital Organism*
-          stale-issue-label: 'stale'
-          exempt-issue-labels: 'pinned,security,priority: high'
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: 🕰 Mark Stale Issues (no external actions)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DAYS_BEFORE_STALE: '30'
+          DAYS_BEFORE_CLOSE: '7'
+          EXEMPT_LABELS: 'pinned,security,priority: high'
+        run: python3 .github/scripts/gh_bot.py stale

@@ -21,10 +21,13 @@ sys.path.insert(0, str(root_dir))
 
 
 def _load_runtime_module():
+    module_name = "haios_runtime"
     try:
-        return importlib.import_module("haios_runtime")
-    except ModuleNotFoundError:
-        return None
+        return importlib.import_module(module_name)
+    except ImportError as exc:
+        if getattr(exc, "name", None) == module_name:
+            return None
+        raise
 
 
 _runtime_module = _load_runtime_module()

@@ -11,9 +11,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unittest
 
-from digital_ai_organism_framework import (ControlMetaData, DigitalEcosystem,
-                                           DigitalGenome, DigitalOrganism,
-                                           SymphonyControlCenter)
+from digital_ai_organism_framework import (
+    ControlMetaData,
+    DigitalEcosystem,
+    DigitalGenome,
+    DigitalOrganism,
+    SymphonyControlCenter,
+)
 from haios_core import LanguageAgnosticCore
 
 

@@ -62,6 +62,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING:** `hyperai.config.allow_stubs()` now defaults to `False` when
+  `HYPERAI_ALLOW_STUBS` is unset or set to an unrecognized value (previously it
+  defaulted to `True`). As a result, `import hyperai` raises `ModuleNotFoundError`
+  unless the real `HAIOSRuntime`/`DRProtocol` implementations are available or
+  `HYPERAI_ALLOW_STUBS=1` is set to enable the stub fallback.
+
+### Fixed
+- Restored importability of the `hyperai` package by fixing syntax errors and
+  duplicate definitions in `cli.py`, `core/haios_runtime.py`,
+  `protocols/dr_protocol.py`, and `config.py`.
+- `SymphonyControlCenter.register_component()` now validates `creator_source`
+  (the attribute actually set to `Alpha_Prime_Omega`) instead of `creator`,
+  fixing the spurious "Ultimate Creator mismatch" assertion that broke
+  `DigitalEcosystem` creation and the ecosystem smoke tests.
+
+### CI/CD
+- Reworked `ci.yml` so the build is green and actually gates merges: fixed the
+  broken `validate` job (it called `DigitalOrganism()`/`DigitalEcosystem()`
+  without the required `name` and a non-existent `simulate_generation()`),
+  corrected the immutable-genes check (`genome.traits`), and made
+  Black/flake8/pytest blocking on the maintained code paths.
+- Scoped Black and flake8 to project code via `pyproject.toml` and `.flake8`,
+  excluding vendored trees (`vscode-merged`, `node_modules`, submodules, etc.).
+- Narrowed the test matrix and `python_requires` to Python 3.10–3.12.
+- Removed the redundant `python-package.yml` (superseded by `ci.yml`) and made
+  `latex-build.yml` skip gracefully when `docs/alpha_omega.tex` is absent.
+
 ### Planned for v1.1.0
 - [ ] Advanced evolution algorithms (NEAT-inspired)
 - [ ] Visualization dashboard for ecosystem monitoring

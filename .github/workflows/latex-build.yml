@@ -9,8 +9,15 @@ jobs:
   build-latex-alpha:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
       - name: Check for LaTeX source
         id: check
         run: |
@@ -20,20 +27,21 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
             echo "::notice::docs/alpha_omega.tex not found; skipping LaTeX build"
           fi
+
       - name: Install LaTeX packages
         if: steps.check.outputs.exists == 'true'
         run: |
           sudo apt-get update -y
           sudo apt-get install -y texlive-xetex texlive-latex-extra texlive-fonts-recommended texlive-lang-vietnamese latexmk
+
       - name: Build PDF
         if: steps.check.outputs.exists == 'true'
         working-directory: docs
         run: |
           set -e
           latexmk -xelatex -pdf -quiet alpha_omega.tex
-      - name: Upload PDF
+
+      - name: Publish PDF to job summary
         if: steps.check.outputs.exists == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: alpha_omega-pdf
-          path: docs/alpha_omega.pdf
+        run: |
+          echo "✅ Built docs/alpha_omega.pdf ($(du -h docs/alpha_omega.pdf | cut -f1))" >> "$GITHUB_STEP_SUMMARY"

@@ -2,6 +2,15 @@ name: Multi Repo Orchestration
 
 on:
   workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Orchestration operation to run'
+        required: false
+        default: 'full_orchestration'
+      emergency_mode:
+        description: 'Run in emergency mode'
+        required: false
+        default: 'false'
 
 jobs:
   orchestrate:
@@ -19,8 +28,6 @@ jobs:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Checkout repo
-        uses: actions/checkout@v4
       - name: 🐍 Setup Python Environment
         uses: actions/setup-python@v5
         with:

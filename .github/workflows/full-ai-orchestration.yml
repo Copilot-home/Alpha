@@ -1,0 +1,82 @@
+name: Full AI Orchestration Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      account_context:
+        description: "Account profile used for orchestration (gmail|icloud)"
+        required: true
+        default: "gmail"
+      enable_auto_merge:
+        description: "Enable auto-merge stage if all gates pass"
+        required: true
+        default: false
+        type: boolean
+      trace_sources:
+        description: "Comma-separated trace file paths for real trace evaluation"
+        required: false
+        default: ""
+
+jobs:
+  validate-drprotocol:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: Install package
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Run protocol validation checks
+        run: |
+          python3 -m py_compile src/hyperai/protocols/dr_protocol.py
+          python3 -m compileall -q src/hyperai/protocols/dr_protocol.py
+          python3 -c "from hyperai.protocols.dr_protocol import DRProtocol; print(DRProtocol.__name__)"
+
+  orchestrate:
+    runs-on: ubuntu-latest
+    needs: validate-drprotocol
+    outputs:
+      policy_decision: ${{ steps.orchestrator.outputs.policy_decision }}
+      validation_passed: ${{ steps.orchestrator.outputs.validation_passed }}
+      trace_status: ${{ steps.orchestrator.outputs.trace_status }}
+    steps:
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: Install package
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Run orchestration control layer
+        id: orchestrator
+        env:
+          ACCOUNT_CONTEXT: ${{ inputs.account_context }}
+          TRACE_SOURCES: ${{ inputs.trace_sources }}
+          GITHUB_TOKEN_GMAIL: ${{ secrets.GITHUB_TOKEN_GMAIL }}
+          GITHUB_TOKEN_ICLOUD: ${{ secrets.GITHUB_TOKEN_ICLOUD }}
+        run: python3 .github/scripts/orchestration_pipeline.py
+
+  auto-merge-gate:
+    runs-on: ubuntu-latest
+    needs: orchestrate
+    if: ${{ inputs.enable_auto_merge && needs.orchestrate.outputs.policy_decision == 'enable_auto_merge' }}
+    steps:
+      - name: Auto-merge policy passed
+        run: |
+          echo "Policy gate passed. Ready for auto-merge integration."

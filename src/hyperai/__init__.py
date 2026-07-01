@@ -16,19 +16,26 @@ __version__ = "1.0.0"
 __author__ = "Nguyễn Đức Cường (alpha_prime_omega)"
 __copyright__ = "Copyright (c) 2025 Nguyễn Đức Cường"
 
+# CLI import
+from .cli import main
+
 # Component imports
 from .components.genome import DigitalGenome
 from .components.metabolism import DigitalMetabolism
 from .components.nervous_system import DigitalNervousSystem
 from .components.organism import DigitalOrganism
+
 # Core imports
 from .core.haios_core import HAIOSCore
 from .core.haios_runtime import HAIOSRuntime
+
 # Ecosystem imports
 from .ecosystem.ecosystem import DigitalEcosystem
 from .protocols.dr_protocol import DRProtocol
+
 # Metadata imports
 from .protocols.metadata import CreatorHierarchy, HAIOSInvariants
+
 # Protocol imports
 from .protocols.symphony import ControlMetaData, SymphonyControlCenter
 
@@ -50,4 +57,6 @@ __all__ = [
     # Metadata
     "HAIOSInvariants",
     "CreatorHierarchy",
+    # CLI
+    "main",
 ]

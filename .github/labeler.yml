@@ -1,58 +1,75 @@
 # Auto-labeling configuration for pull requests
-# Based on changed files
+# Based on changed files (actions/labeler v5 format)
 
 # Core framework changes
 'core':
-  - digital_ai_organism_framework.py
+  - changed-files:
+      - any-glob-to-any-file: 'digital_ai_organism_framework.py'
 
 # Documentation
 'documentation':
-  - '**/*.md'
-  - 'docs/**/*'
-  - 'README.md'
-  - 'CONTRIBUTING.md'
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - 'docs/**/*'
+          - 'README.md'
+          - 'CONTRIBUTING.md'
 
 # Tests
 'tests':
-  - 'tests/**/*'
-  - '**/test_*.py'
-  - '**/*_test.py'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'tests/**/*'
+          - '**/test_*.py'
+          - '**/*_test.py'
 
 # Examples & Demos
 'examples':
-  - 'demo.py'
-  - 'examples/**/*'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'demo.py'
+          - 'examples/**/*'
 
 # GitHub specific
 'github':
-  - '.github/**/*'
+  - changed-files:
+      - any-glob-to-any-file: '.github/**/*'
 
 # CI/CD
 'ci-cd':
-  - '.github/workflows/**/*'
+  - changed-files:
+      - any-glob-to-any-file: '.github/workflows/**/*'
 
 # Dependencies
 'dependencies':
-  - 'requirements.txt'
-  - 'setup.py'
-  - 'pyproject.toml'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'requirements.txt'
+          - 'setup.py'
+          - 'pyproject.toml'
 
 # Blog & Distribution
 'content':
-  - 'blog/**/*'
-  - 'distribution/**/*'
-  - 'video/**/*'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'blog/**/*'
+          - 'distribution/**/*'
+          - 'video/**/*'
 
 # Research
 'research':
-  - 'research/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'research/**/*'
 
 # Community
 'community':
-  - 'community/**/*'
-  - 'CODE_OF_CONDUCT.md'
-  - '.github/SUPPORT.md'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'community/**/*'
+          - 'CODE_OF_CONDUCT.md'
+          - '.github/SUPPORT.md'
 
 # Planning
 'planning':
-  - 'planning/**/*'
+  - changed-files:
+      - any-glob-to-any-file: 'planning/**/*'

@@ -1,60 +1,32 @@
-name: 🤖 Enhanced Issue Automation
+name: Enhanced Issue Automation
 
 on:
   issues:
-    types: [opened, reopened]
+    types: [opened, edited]
   workflow_dispatch:
-    inputs:
-      process_all:
-        description: 'Process all open issues'
-        required: false
-        default: 'false'
-
-permissions:
-  issues: write
-  contents: read
 
 jobs:
-  process-issue:
+  process:
     runs-on: ubuntu-latest
-    name: Intelligent Issue Processing
-    
     steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
-      
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-      
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
       - name: 📦 Install Dependencies
-        run: |
-          pip install PyGithub
-      
+        run: pip install PyGithub
+
       - name: 🤖 Process New Issue
-        if: github.event_name == 'issues'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          DRY_RUN: 'false'
         run: |
-          python .github/scripts/enhanced_issue_handler.py
-      
-      - name: 🔄 Process All Issues
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.process_all == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          DRY_RUN: 'false'
-        run: |
-          python .github/scripts/enhanced_issue_handler.py
-      
-      - name: 📊 Report Results
-        if: always()
-        run: |
-          echo "✅ Issue automation completed"
-          echo "Powered by HYPERAI Framework"
-          echo "Creator: Nguyễn Đức Cường (alpha_prime_omega)"
+          if [ -f scripts/process_issue.py ]; then
+            python3 scripts/process_issue.py
+          else
+            echo "scripts/process_issue.py not present; skipping."
+          fi

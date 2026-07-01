@@ -33,8 +33,12 @@ class TestModuleImports(unittest.TestCase):
     def test_component_imports(self):
         """Test component module imports"""
         try:
-            from src.hyperai import (DigitalGenome, DigitalMetabolism,
-                                     DigitalNervousSystem, DigitalOrganism)
+            from src.hyperai import (
+                DigitalGenome,
+                DigitalMetabolism,
+                DigitalNervousSystem,
+                DigitalOrganism,
+            )
 
             self.assertIsNotNone(DigitalGenome)
             self.assertIsNotNone(DigitalMetabolism)
@@ -55,8 +59,7 @@ class TestModuleImports(unittest.TestCase):
     def test_protocol_imports(self):
         """Test protocol module imports"""
         try:
-            from src.hyperai import (ControlMetaData, DRProtocol,
-                                     SymphonyControlCenter)
+            from src.hyperai import ControlMetaData, DRProtocol, SymphonyControlCenter
 
             self.assertIsNotNone(SymphonyControlCenter)
             self.assertIsNotNone(ControlMetaData)
@@ -101,10 +104,8 @@ class TestModuleImports(unittest.TestCase):
     def test_backward_compatibility(self):
         """Test that old root-level imports still work"""
         try:
-            from digital_ai_organism_framework import \
-                DigitalGenome as OldGenome
-            from digital_ai_organism_framework import \
-                DigitalOrganism as OldOrganism
+            from digital_ai_organism_framework import DigitalGenome as OldGenome
+            from digital_ai_organism_framework import DigitalOrganism as OldOrganism
             from haios_core import LanguageAgnosticCore as OldCore
 
             self.assertIsNotNone(OldOrganism)

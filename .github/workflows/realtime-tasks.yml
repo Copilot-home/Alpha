@@ -1,140 +1,22 @@
-name: 🔄 Real-Time Autonomous Task Generation
+name: Realtime Tasks
 
 on:
-  schedule:
-    # Every minute - continuous operation
-    - cron: '* * * * *'
   workflow_dispatch:
-    inputs:
-      interval:
-        description: 'Task generation interval (seconds)'
-        required: false
-        default: '10'
-        type: string
-      duration:
-        description: 'Run duration (minutes, 0 = infinite)'
-        required: false
-        default: '5'
-        type: string
-
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
 
 jobs:
-  realtime_tasks:
+  process:
     runs-on: ubuntu-latest
-    name: Continuous Task Generation & Execution
-    timeout-minutes: 10
-    
     steps:
-      - name: 🧬 Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-      
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-      
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
       - name: 📦 Install Dependencies
         run: |
           pip install --upgrade pip
           pip install PyGithub pyyaml black isort pylint
-      
-      - name: 🔄 Run Real-Time Task Generator
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INTERVAL: ${{ github.event.inputs.interval || '10' }}
-          DURATION: ${{ github.event.inputs.duration || '5' }}
-        run: |
-          echo "🧬 Starting Real-Time Autonomous Task Generator"
-          echo "⏱️  Interval: ${INTERVAL}s | Duration: ${DURATION}min"
-          
-          # Run for specified duration
-          timeout ${DURATION}m python3 .github/scripts/realtime_task_generator.py || {
-            echo "✅ Task generator completed normally"
-          }
-      
-      - name: 📊 Upload Task Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: task-logs-${{ github.run_id }}
-          path: logs/*.json
-          retention-days: 7
-      
-      - name: 💾 Commit Generated Changes
-        if: success()
-        run: |
-          git config user.name "DAIOF Organism"
-          git config user.email "organism@daiof-framework.dev"
-          
-          # Check for changes
-          if [ -n "$(git status --porcelain)" ]; then
-            git add -A
-            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
-            
-            # Count changes
-            CHANGES=$(git diff --cached --shortstat | sed 's/[^0-9]*//g' | awk '{print $1}')
-            
-            # Create commit message
-            COMMIT_MSG="🤖 Real-time auto-updates: $TIMESTAMP - Generated and executed tasks autonomously - Changes: $CHANGES files - Task logs in logs/ directory [Autonomous Task Generator]"
-            
-            git commit -m "$COMMIT_MSG"
-            git push
-            echo "✅ Changes committed and pushed"
-          else
-            echo "ℹ️  No changes to commit"
-          fi
-      
-      - name: 📈 Report to Summary
-        if: always()
-        run: |
-          echo "## 🔄 Real-Time Task Generation Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          # Generate dashboard with existing script
-          if [ -f ".github/scripts/metrics_dashboard.py" ]; then
-            echo "### 📊 Task Execution Summary" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "✅ Real-time task generator executed successfully" >> $GITHUB_STEP_SUMMARY
-            echo "📁 Task logs available in logs/ directory" >> $GITHUB_STEP_SUMMARY
-          fi
-
-  # Separate job for longer running tasks (runs less frequently)
-  deep_analysis:
-    runs-on: ubuntu-latest
-    name: Deep Analysis & Strategic Tasks
-    if: github.event_name == 'schedule'
-    
-    steps:
-      - name: 🧬 Checkout Repository
-        uses: actions/checkout@v4
-      
-      - name: 🔍 Deep Code Analysis
-        run: |
-          echo "🔬 Running deep analysis..."
-          
-          # Analyze codebase structure
-          echo "📊 Repository structure:"
-          find . -type f -name "*.py" | wc -l
-          
-          # Check for potential improvements
-          echo "🎯 Improvement opportunities:"
-          # Add analysis logic here
-      
-      - name: 🎯 Generate Strategic Tasks
-        run: |
-          echo "🎯 Generating strategic improvement tasks..."
-          
-          # Tasks that require longer execution time
-          # Architecture improvements
-          # Performance optimizations
-          # Feature enhancements
-          
-          echo "✅ Strategic analysis complete"

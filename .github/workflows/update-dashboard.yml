@@ -2,12 +2,9 @@ name: 📊 Update Metrics Dashboard
 
 on:
   schedule:
-    # Run every 6 hours
     - cron: '0 */6 * * *'
-  
   push:
     branches: [ main ]
-  
   workflow_dispatch:
     inputs:
       force_update:
@@ -15,48 +12,47 @@ on:
         required: false
         default: 'true'
 
+permissions:
+  contents: write
+
 jobs:
   update-dashboard:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0  # Full history for metrics
-      
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
+      - name: 📥 Checkout (self-contained, full history)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
       - name: 📊 Generate Dashboard
-        run: |
-          python3 .github/scripts/metrics_dashboard.py
-      
+        run: python3 .github/scripts/metrics_dashboard.py
+
       - name: 🌐 Run Network Optimization Check
-        run: |
-          python3 .github/scripts/github_network_optimizer.py
-      
+        run: python3 .github/scripts/github_network_optimizer.py
+
       - name: 📝 Commit Updated Metrics
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "DAIOF Organism"
-          
           if git diff --quiet; then
             echo "No changes to commit"
           else
             git add DASHBOARD.md metrics/ NETWORK_REPORT.md
             git commit -m "📊 Auto-update metrics dashboard - $(date '+%Y-%m-%d %H:%M')"
-            git push
+            git push origin "HEAD:${GITHUB_REF_NAME}"
             echo "✅ Dashboard updated and pushed"
           fi
-      
+
       - name: 📈 Display Current Health
         run: |
           if [ -f metrics/latest.json ]; then
-            echo "🧬 DAIOF ORGANISM HEALTH REPORT" >> $GITHUB_STEP_SUMMARY
-            echo "Dashboard updated successfully" >> $GITHUB_STEP_SUMMARY
-            echo "View full metrics: DASHBOARD.md" >> $GITHUB_STEP_SUMMARY
+            echo "🧬 DAIOF ORGANISM HEALTH REPORT" >> "$GITHUB_STEP_SUMMARY"
+            echo "Dashboard updated successfully" >> "$GITHUB_STEP_SUMMARY"
+            echo "View full metrics: DASHBOARD.md" >> "$GITHUB_STEP_SUMMARY"
           fi

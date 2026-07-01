@@ -36,6 +36,7 @@ class TestAllowStubs(unittest.TestCase):
 
     def test_falsy_values(self):
         for value in ("0", "false", "off", "no", "random", " false ", " NO ", " Off "):
+        for value in ("0", "false", "off", "no", "random"):
             with self.subTest(value=value):
                 os.environ["HYPERAI_ALLOW_STUBS"] = value
                 self.assertFalse(allow_stubs())

@@ -5,212 +5,69 @@ on:
     types: [opened, closed]
   issues:
     types: [opened, closed]
-  discussion:
-    types: [created, answered]
   schedule:
-    # Daily community engagement at 9 AM UTC
     - cron: '0 9 * * *'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   issues: write
   pull-requests: write
-  discussions: write
 
 jobs:
   recognize_contributions:
     runs-on: ubuntu-latest
     name: Recognize Quality Contributions
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-    
     steps:
-      - name: 🌟 Thank Contributor
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const pr = context.payload.pull_request;
-            
-            // Thank message
-            let message = `🎉 **Thank you @${pr.user.login}!**\n\n`;
-            message += `Your contribution has been merged and is now part of the Digital Organism! 🧬\n\n`;
-            message += `**Impact**:\n`;
-            message += `- ${pr.additions} additions, ${pr.deletions} deletions\n`;
-            message += `- ${pr.changed_files} files changed\n`;
-            message += `- Merged into \`${pr.base.ref}\` branch\n\n`;
-            message += `🏆 **Recognition**: You're now part of the DAIOF contributor community!\n\n`;
-            
-            // Quality indicators
-            if (pr.additions > 100) {
-              message += `🌟 **Major Contribution** - Significant impact on the framework!\n`;
-            }
-            
-            if (pr.changed_files >= 5) {
-              message += `🎯 **Multi-faceted Work** - Touched multiple areas of the codebase!\n`;
-            }
-            
-            message += `\n📊 **Your contribution will be featured in**:\n`;
-            message += `- Next release notes\n`;
-            message += `- Monthly contributor spotlight\n`;
-            message += `- README contributors section\n\n`;
-            message += `Keep the amazing work coming! 🚀\n\n`;
-            message += `*Automated recognition by Digital Organism*`;
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr.number,
-              body: message
-            });
-      
-      - name: ⭐ Auto-Star Quality PRs
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const pr = context.payload.pull_request;
-            
-            // Quality criteria for auto-star
-            const isQuality = (
-              pr.additions > 50 ||
-              pr.changed_files >= 3 ||
-              (pr.title.toLowerCase().includes('feature') && pr.additions > 20)
-            );
-            
-            if (isQuality) {
-              // Add gold star reaction
-              await github.rest.reactions.createForIssue({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                content: 'rocket'
-              });
-              
-              console.log(`⭐ Added star reaction to quality PR #${pr.number}`);
-            }
-  
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: 🌟 Thank Contributor & star quality PRs (no external actions)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/gh_bot.py community-recognize
+
   daily_engagement:
     runs-on: ubuntu-latest
     name: Daily Community Engagement
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    
     steps:
-      - name: 🧬 Checkout Repository
-        uses: actions/checkout@v4
-      
-      - name: 📊 Generate Community Stats
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            
-            // Get last 7 days of activity
-            const since = new Date();
-            since.setDate(since.getDate() - 7);
-            
-            // Get recent issues
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner,
-              repo,
-              state: 'all',
-              since: since.toISOString(),
-              per_page: 100
-            });
-            
-            // Get recent PRs
-            const { data: prs } = await github.rest.pulls.list({
-              owner,
-              repo,
-              state: 'all',
-              per_page: 100
-            });
-            
-            // Calculate stats
-            const newIssues = issues.filter(i => !i.pull_request && new Date(i.created_at) > since).length;
-            const closedIssues = issues.filter(i => !i.pull_request && i.state === 'closed' && new Date(i.closed_at) > since).length;
-            const newPRs = prs.filter(pr => new Date(pr.created_at) > since).length;
-            const mergedPRs = prs.filter(pr => pr.merged_at && new Date(pr.merged_at) > since).length;
-            
-            // Get unique contributors
-            const contributors = new Set();
-            [...issues, ...prs].forEach(item => contributors.add(item.user.login));
-            
-            console.log(`📊 Weekly Stats:`);
-            console.log(`   Issues: ${newIssues} new, ${closedIssues} closed`);
-            console.log(`   PRs: ${newPRs} new, ${mergedPRs} merged`);
-            console.log(`   Contributors: ${contributors.size} unique`);
-            
-            // Store for use in next step
-            const fs = require('fs');
-            fs.writeFileSync('community_stats.json', JSON.stringify({
-              newIssues,
-              closedIssues,
-              newPRs,
-              mergedPRs,
-              contributors: contributors.size,
-              week: since.toISOString()
-            }));
-      
-      
-      # ⚠️ WEEKLY DISCUSSION CREATION DISABLED
-      # Reason: Complex JS template literals (backticks) cause YAML parsing errors
-      # Will re-enable post-launch with proper string escaping
-      # Feature: Auto-creates weekly community discussions on Mondays
-  
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: 📊 Generate Community Stats (no external actions)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/gh_bot.py community-stats
+
   encourage_newcomers:
     runs-on: ubuntu-latest
     name: Encourage New Contributors
     if: github.event_name == 'issues' && github.event.action == 'opened'
-    
     steps:
-      - name: 🌟 Check if First-Time Contributor
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const issue = context.payload.issue;
-            const author = issue.user.login;
-            
-            // Check if first contribution
-            const { data: authorIssues } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              creator: author,
-              state: 'all'
-            });
-            
-            const isFirstIssue = authorIssues.length === 1;
-            
-            if (isFirstIssue) {
-              let message = `🎉 **Welcome to DAIOF, @${author}!**\n\n`;
-              message += `Thank you for opening your first issue! You're now part of our digital organism community. 🧬\n\n`;
-              message += `**What happens next**:\n`;
-              message += `1. Our team will review your issue within 24-48 hours\n`;
-              message += `2. If it's a bug, we'll investigate and fix it\n`;
-              message += `3. If it's a feature request, we'll discuss feasibility\n`;
-              message += `4. If it's a question, we'll provide guidance\n\n`;
-              message += `**Want to contribute code?** 💻\n`;
-              message += `Check out our [Contributing Guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md)\n\n`;
-              message += `**Looking for easy tasks?** 🎯\n`;
-              message += `Browse issues labeled [\`good first issue\`](https://github.com/${context.repo.owner}/${context.repo.repo}/labels/good%20first%20issue)\n\n`;
-              message += `We're excited to have you here! 🚀\n\n`;
-              message += `*Automated welcome by Digital Organism*`;
-              
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                body: message
-              });
-              
-              // Add special label
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                labels: ['first-time-contributor']
-              });
-            }
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: 🌟 Welcome First-Time Contributor (no external actions)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/gh_bot.py community-newcomer

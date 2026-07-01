@@ -15,7 +15,66 @@ No configuration needed!
 
 import random
 
-from src.digital_organism import DigitalGenome, DigitalOrganism
+try:
+    # Ưu tiên local: chạy thẳng từ root repo, không phụ thuộc nền tảng cài đặt
+    from digital_ai_organism_framework import DigitalGenome, DigitalOrganism
+except ImportError:
+    # Fallback khi package đã được cài vào môi trường
+    from hyperai import DigitalGenome, DigitalOrganism
+
+
+def create_genome(traits, mutation_rate):
+    """Tạo genome tương thích cho cả 2 biến thể API."""
+    try:
+        return DigitalGenome(traits=traits, mutation_rate=mutation_rate)
+    except TypeError:
+        return DigitalGenome(initial_traits=traits)
+
+
+def create_organism(name, genome, initial_resources=None):
+    """Tạo organism tương thích cho cả 2 biến thể API."""
+    try:
+        organism = DigitalOrganism(organism_id=name, genome=genome)
+    except TypeError:
+        organism = DigitalOrganism(name=name, genome=genome)
+
+    if initial_resources and hasattr(organism, "metabolism"):
+        organism.metabolism.resources.update(initial_resources)
+
+    return organism
+
+
+def get_organism_name(organism):
+    return getattr(organism, "organism_id", getattr(organism, "name", "Unknown"))
+
+
+def get_organism_energy(organism):
+    if hasattr(organism, "energy"):
+        return organism.energy
+    if hasattr(organism, "metabolism"):
+        return organism.metabolism.resources.get("cpu_cycles", "N/A")
+    return "N/A"
+
+
+def mutate_genome(genome, mutation_rate):
+    try:
+        return genome.mutate(mutation_rate=mutation_rate)
+    except TypeError:
+        return genome.mutate()
+
+
+def decide_action(organism, environment):
+    if hasattr(organism, "perceive_and_decide"):
+        return organism.perceive_and_decide(environment)
+
+    if hasattr(organism, "nervous_system"):
+        perception = organism.nervous_system.perceive_environment(environment)
+        options = ["explore", "gather_resources", "defend", "rest", "collaborate"]
+        action = organism.nervous_system.make_decision(options, perception)
+        confidence = 1.0 / (options.index(action) + 1) if action in options else 0.5
+        return {"action": action, "confidence": confidence}
+
+    return {"action": "evaluate", "confidence": 0.0}
 
 
 def print_separator(title=""):
@@ -37,7 +96,7 @@ def main():
     print_separator("STEP 1: Creating Your First Organism")
 
     # Define genetic traits (like DNA)
-    genome = DigitalGenome(
+    genome = create_genome(
         traits={
             "learning_rate": 0.05,  # How fast it learns
             "exploration_factor": 0.6,  # How adventurous it is
@@ -52,8 +111,8 @@ def main():
     )
 
     # Create the organism
-    organism = DigitalOrganism(
-        organism_id="Explorer_01",
+    organism = create_organism(
+        name="Explorer_01",
         genome=genome,
         initial_resources={
             "cpu_cycles": 100,
@@ -64,8 +123,8 @@ def main():
         },
     )
 
-    print(f"✅ Created organism: {organism.organism_id}")
-    print(f"⚡ Energy level: {organism.energy}")
+    print(f"✅ Created organism: {get_organism_name(organism)}")
+    print(f"⚡ Energy level: {get_organism_energy(organism)}")
     print(f"🧬 Genome traits:")
     for trait, value in genome.traits.items():
         print(f"   • {trait}: {value:.2f}")
@@ -80,20 +139,18 @@ def main():
     # Create 3 offspring with mutations
     offspring = []
     for i in range(3):
-        child_genome = genome.mutate()
-        child = DigitalOrganism(
-            organism_id=f"Explorer_01_Child_{i+1}", genome=child_genome
-        )
+        child_genome = mutate_genome(genome, mutation_rate=0.1)
+        child = create_organism(name=f"Explorer_01_Child_{i+1}", genome=child_genome)
         offspring.append((child, child_genome))
 
     # Show evolution
-    print(f"👨 PARENT: {organism.organism_id}")
+    print(f"👨 PARENT: {get_organism_name(organism)}")
     print(f"   Exploration: {genome.traits['exploration_factor']:.3f}")
     print(f"   Learning:    {genome.traits['learning_rate']:.3f}")
     print(f"   Risk:        {genome.traits['risk_tolerance']:.3f}\n")
 
     for child, child_genome in offspring:
-        print(f"👶 OFFSPRING: {child.organism_id}")
+        print(f"👶 OFFSPRING: {get_organism_name(child)}")
         print(
             f"   Exploration: {child_genome.traits['exploration_factor']:.3f} "
             f"({((child_genome.traits['exploration_factor'] - genome.traits['exploration_factor']) / genome.traits['exploration_factor'] * 100):+.1f}%)"
@@ -147,7 +204,7 @@ def main():
     print("Testing organism's decision-making in different environments:\n")
 
     for scenario in scenarios:
-        decision = organism.perceive_and_decide(scenario["data"])
+        decision = decide_action(organism, scenario["data"])
         print(f"🌍 {scenario['name']}:")
         print(
             f"   Challenge: {scenario['data']['challenge_level']:.1f} | "
@@ -189,7 +246,9 @@ def main():
         print(f"Generation {generation + 1}:")
         print(f"   Population: {len(population)} organisms")
         print(f"   Avg Fitness: {avg_fitness:.3f}")
-        print(f"   Best: {best.organism_id} (fitness: {best.genome.fitness_score:.3f})")
+        print(
+            f"   Best: {get_organism_name(best)} (fitness: {best.genome.fitness_score:.3f})"
+        )
 
         # Create next generation (simplified)
         if generation < 4:  # Don't create new gen on last iteration
@@ -200,9 +259,9 @@ def main():
             # Create offspring from survivors
             new_population = survivors.copy()
             for i in range(2):
-                child_genome = survivors[0].genome.mutate()
-                child = DigitalOrganism(
-                    organism_id=f"Gen{generation+2}_Organism_{i+1}", genome=child_genome
+                child_genome = mutate_genome(survivors[0].genome, mutation_rate=0.1)
+                child = create_organism(
+                    name=f"Gen{generation+2}_Organism_{i+1}", genome=child_genome
                 )
                 new_population.append(child)
 

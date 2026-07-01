@@ -1,0 +1,40 @@
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311", "py312"]
+extend-exclude = '''
+/(
+    \.venv
+  | \.git
+  | \.haios_snapshots
+  | \.consciousness
+  | build
+  | dist
+  | node_modules
+  | metrics
+  | logs
+  | vscode
+  | vscode-merged
+  | vscode-python-environments
+  | trust_of_copilot
+  | DAIOF-Framework
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip_glob = [
+    ".venv/*",
+    "vscode/*",
+    "vscode-merged/*",
+    "vscode-python-environments/*",
+    "trust_of_copilot/*",
+    "DAIOF-Framework/*",
+    "node_modules/*",
+    "metrics/*",
+    "logs/*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

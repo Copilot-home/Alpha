@@ -1,4 +1,4 @@
-name: 🏷️ Auto Label PRs
+name: 🏷 Auto Label PRs
 
 on:
   pull_request:
@@ -12,23 +12,18 @@ jobs:
   label:
     runs-on: ubuntu-latest
     steps:
-      - name: Label based on file changes
-        uses: actions/labeler@v4
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          configuration-path: .github/labeler.yml
-      
-      - name: Label based on size
-        uses: codelytv/pr-size-labeler@v1
-        with:
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
+
+      - name: Label by path + size (no external actions)
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          xs_label: 'size/xs'
-          xs_max_size: '10'
-          s_label: 'size/s'
-          s_max_size: '50'
-          m_label: 'size/m'
-          m_max_size: '200'
-          l_label: 'size/l'
-          l_max_size: '500'
-          xl_label: 'size/xl'
-          fail_if_xl: 'false'
+        run: |
+          pip install pyyaml -q
+          python3 .github/scripts/gh_bot.py label

@@ -1,74 +1,32 @@
-name: Digital Organism Health Check
+name: Health Check
 
 on:
   schedule:
-    # Kiểm tra sức khỏe mỗi 12 giờ
-    - cron: '0 */12 * * *'
+    - cron: '0 */4 * * *'
   workflow_dispatch:
-    inputs:
-      generate_report:
-        description: 'Generate detailed health report'
-        required: false
-        type: boolean
-        default: true
-
-permissions:
-  contents: write
-  issues: write
 
 jobs:
-  health-check:
+  health:
     runs-on: ubuntu-latest
     steps:
-      - name: 🧬 Checkout Digital Organism
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: 📦 Install Dependencies
+      - name: Checkout (self-contained)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          pip install PyGithub pyyaml
+          git init -q .
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q --depth 1 origin "${GITHUB_REF}"
+          git checkout -q FETCH_HEAD
 
-      - name: 🏥 Run Health Monitor
+      - name: Install Dependencies
+        run: pip install PyGithub pyyaml
+
+      - name: Run Health Monitor
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO_NAME: ${{ github.repository }}
         run: |
-          chmod +x .github/scripts/health_monitor.py
-          python .github/scripts/health_monitor.py
-
-      - name: 💾 Commit Health Report
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "Digital Organism 🧬"
-          
-          if [[ -n $(git status -s metrics/) ]]; then
-            git add metrics/
-            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
-            git commit -m "🏥 Health check: $TIMESTAMP - Auto-generated health report"
-            git push
+          if [ -f scripts/health_monitor.py ]; then
+            python3 scripts/health_monitor.py
           else
-            echo "No new health data to commit"
-          fi
-
-      - name: 📊 Health Summary
-        if: always()
-        run: |
-          echo "## 🧬 Digital Organism Health Check" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [ -f metrics/health_report_*.json ]; then
-            LATEST_REPORT=$(ls -t metrics/health_report_*.json | head -1)
-            HEALTH=$(python -c "import json; print(json.load(open('$LATEST_REPORT'))['overall_health'])")
-            
-            echo "**Overall Health**: $HEALTH" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "✅ Health monitoring completed" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ No health report generated" >> $GITHUB_STEP_SUMMARY
+            python3 .github/scripts/health_monitor.py
           fi

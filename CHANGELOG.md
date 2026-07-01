@@ -62,6 +62,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING:** `hyperai.config.allow_stubs()` now defaults to `False` when
+  `HYPERAI_ALLOW_STUBS` is unset or set to an unrecognized value (previously it
+  defaulted to `True`). As a result, `import hyperai` raises `ModuleNotFoundError`
+  unless the real `HAIOSRuntime`/`DRProtocol` implementations are available or
+  `HYPERAI_ALLOW_STUBS=1` is set to enable the stub fallback.
+
+### Fixed
+- Restored importability of the `hyperai` package by fixing syntax errors and
+  duplicate definitions in `cli.py`, `core/haios_runtime.py`,
+  `protocols/dr_protocol.py`, and `config.py`.
+- `SymphonyControlCenter.register_component()` now validates `creator_source`
+  (the attribute actually set to `Alpha_Prime_Omega`) instead of `creator`,
+  fixing the spurious "Ultimate Creator mismatch" assertion that broke
+  `DigitalEcosystem` creation and the ecosystem smoke tests. The companion
+  `human_creator` check now also asserts against `human_creator` (the attribute
+  it gates on) instead of `creator`, removing a latent mismatch. The same
+  corrections are applied to the `src/hyperai/` copy (asserting `creator_source`
+  / `human_creator` against that copy's own creator values).
+- `haios_runtime.py` (root and `src/hyperai/`) no longer arms `signal.alarm(30)`
+  / `signal.signal(SIGALRM, ...)` at import time. Importing the module would
+  previously call `sys.exit(0)` 30 seconds later in the host process and crash
+  on Windows (no `SIGALRM`). The guard now lives in `install_timeout_guard()`,
+  invoked only when the module runs as a script and only where `SIGALRM` exists.
+
+### CI/CD
+- Reworked `ci.yml` so the build is green and actually gates merges: fixed the
+  broken `validate` job (it called `DigitalOrganism()`/`DigitalEcosystem()`
+  without the required `name` and a non-existent `simulate_generation()`),
+  corrected the immutable-genes check (`genome.traits`), and made
+  Black/flake8/pytest blocking on the maintained code paths.
+- Scoped Black and flake8 to project code via `pyproject.toml` and `.flake8`,
+  excluding vendored trees (`vscode-merged`, `node_modules`, submodules, etc.).
+- Narrowed the test matrix and `python_requires` to Python 3.10–3.12.
+- Removed the redundant `python-package.yml` (superseded by `ci.yml`) and made
+  `latex-build.yml` skip gracefully when `docs/alpha_omega.tex` is absent.
+
 ### Planned for v1.1.0
 - [ ] Advanced evolution algorithms (NEAT-inspired)
 - [ ] Visualization dashboard for ecosystem monitoring

@@ -20,6 +20,12 @@ root_dir = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(root_dir))
 
 
+    HAIOSRuntime = HAIOSRuntimeImpl
+except ImportError:
+    if not _allow_stubs():
+        raise
+
+    # If haios_runtime doesn't exist, provide a stub
 def _load_runtime_module():
     module_name = "haios_runtime"
     try:
